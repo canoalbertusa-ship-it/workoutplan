@@ -1,1011 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>March 9 – May 3 Training Routine Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#f4f6f8;
-      --card:#ffffff;
-      --text:#1b2430;
-      --muted:#66727f;
-      --line:#d8dee5;
-      --shadow:0 8px 24px rgba(16,24,40,.08);
-      --radius:16px;
-      --accent:#18354d;
-      --accent-2:#2c587c;
-      --strength-bg:#eef5fb;
-      --aesthetic-bg:#f3efff;
-      --lower-bg:#fff5df;
-      --recovery-bg:#eef8f1;
-      --good:#238a5a;
-      --warn:#c78116;
-      --soft:#f8fafc;
-    }
+<meta charset="UTF-8">
+<title>Body Recomp Training Dashboard</title>
 
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.35;
-    }
+<style>
+body{
+font-family:Arial, Helvetica, sans-serif;
+margin:0;
+background:#f4f6f8;
+}
 
-    .app{
-      max-width:1400px;
-      margin:0 auto;
-      padding:18px;
-    }
+header{
+background:#1f2937;
+color:white;
+padding:20px;
+text-align:center;
+}
 
-    .header{
-      background:linear-gradient(135deg,var(--accent),#102435);
-      color:#fff;
-      border-radius:20px;
-      padding:22px;
-      box-shadow:var(--shadow);
-      margin-bottom:16px;
-    }
+.tabs{
+display:flex;
+flex-wrap:wrap;
+background:#e5e7eb;
+}
 
-    .header h1{
-      margin:0 0 8px 0;
-      font-size:30px;
-      letter-spacing:.2px;
-    }
+.tab{
+padding:12px 18px;
+cursor:pointer;
+border-right:1px solid #d1d5db;
+}
 
-    .sub{
-      color:rgba(255,255,255,.9);
-      font-size:14px;
-      max-width:980px;
-    }
+.tab.active{
+background:white;
+font-weight:bold;
+}
 
-    .toolbar{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
+.week{
+display:none;
+padding:20px;
+}
 
-    button{
-      border:none;
-      border-radius:12px;
-      background:#fff;
-      color:var(--accent);
-      padding:10px 14px;
-      font:inherit;
-      font-weight:700;
-      cursor:pointer;
-    }
+.week.active{
+display:block;
+}
 
-    button.secondary{
-      background:#6e7c89;
-      color:#fff;
-    }
+.day{
+background:white;
+padding:18px;
+margin-bottom:15px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
 
-    button.danger{
-      background:#8e3237;
-      color:#fff;
-    }
+.day h3{
+margin-top:0;
+}
 
-    .top-grid{
-      display:grid;
-      grid-template-columns:340px 1fr;
-      gap:16px;
-      align-items:start;
-      margin-bottom:16px;
-    }
+.exercise{
+margin:6px 0;
+}
 
-    .panel{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-      border:1px solid rgba(16,24,40,.04);
-    }
+.bottom{
+margin-top:10px;
+border-top:1px solid #e5e7eb;
+padding-top:10px;
+}
 
-    .panel h2, .panel h3{
-      margin:0 0 12px 0;
-      font-size:18px;
-    }
+.recovery{
+margin-top:10px;
+font-size:14px;
+color:#374151;
+background:#f9fafb;
+padding:8px;
+border-radius:6px;
+}
 
-    .kpi-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
+@media print{
+.tabs{display:none;}
+}
+</style>
 
-    .kpi{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:#fff;
-    }
-
-    .kpi .label{
-      font-size:11px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.05em;
-      margin-bottom:6px;
-      font-weight:700;
-    }
-
-    .kpi .value{
-      font-size:24px;
-      font-weight:800;
-    }
-
-    .small{font-size:13px;color:var(--muted)}
-    .tiny{font-size:12px;color:var(--muted)}
-    .bold{font-weight:800}
-
-    .progress{
-      width:100%;
-      height:12px;
-      background:#e8edf2;
-      border-radius:999px;
-      overflow:hidden;
-      margin-top:8px;
-    }
-
-    .progress > span{
-      display:block;
-      height:100%;
-      width:0%;
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));
-      border-radius:999px;
-      transition:width .2s ease;
-    }
-
-    .legend{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-size:12px;
-      font-weight:700;
-    }
-
-    .pill::before{
-      content:"";
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      display:inline-block;
-    }
-
-    .pill.strength::before{background:#2c587c}
-    .pill.aesthetic::before{background:#6a50d3}
-    .pill.lower::before{background:#c78116}
-    .pill.recovery::before{background:#238a5a}
-
-    .weeks{
-      display:grid;
-      gap:18px;
-    }
-
-    .week{
-      background:transparent;
-    }
-
-    .week-head{
-      margin-bottom:10px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-end;
-      flex-wrap:wrap;
-    }
-
-    .week-head h2{
-      margin:0;
-      font-size:22px;
-    }
-
-    .week-summary{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:10px;
-      margin-bottom:12px;
-    }
-
-    .summary-box{
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      box-shadow:var(--shadow);
-    }
-
-    .summary-box .label{
-      font-size:11px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.05em;
-      margin-bottom:6px;
-      font-weight:700;
-    }
-
-    .summary-box .value{
-      font-size:22px;
-      font-weight:800;
-    }
-
-    .days{
-      display:grid;
-      gap:14px;
-    }
-
-    .day{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-    }
-
-    .day-head{
-      padding:16px;
-      border-bottom:1px solid var(--line);
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-
-    .day.strength .day-head{background:var(--strength-bg)}
-    .day.aesthetic .day-head{background:var(--aesthetic-bg)}
-    .day.lower .day-head{background:var(--lower-bg)}
-    .day.recovery .day-head{background:var(--recovery-bg)}
-
-    .day-title{
-      margin:0;
-      font-size:20px;
-      font-weight:800;
-    }
-
-    .day-sub{
-      font-size:14px;
-      margin-top:4px;
-      color:#42505f;
-    }
-
-    .day-badges{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .badge{
-      background:#fff;
-      border:1px solid rgba(0,0,0,.06);
-      border-radius:999px;
-      padding:7px 10px;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .badge.complete{
-      color:var(--good);
-      background:#eaf7f0;
-    }
-
-    .day-body{
-      padding:16px;
-      display:grid;
-      gap:14px;
-    }
-
-    .exercise-list{
-      display:grid;
-      gap:10px;
-    }
-
-    .exercise{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:#fff;
-    }
-
-    .exercise-top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      flex-wrap:wrap;
-      margin-bottom:8px;
-    }
-
-    .exercise-name{
-      font-size:15px;
-      font-weight:800;
-    }
-
-    .exercise-meta{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-
-    .exercise-grid{
-      display:grid;
-      grid-template-columns:120px 120px 1fr;
-      gap:8px;
-      align-items:end;
-    }
-
-    label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:700;
-      margin-bottom:5px;
-    }
-
-    input[type="text"], textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 12px;
-      font:inherit;
-      color:var(--text);
-      background:#fff;
-    }
-
-    input[type="checkbox"]{
-      transform:scale(1.1);
-      accent-color:var(--accent);
-      cursor:pointer;
-    }
-
-    textarea{
-      min-height:90px;
-      resize:vertical;
-    }
-
-    .check-inline{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:13px;
-      font-weight:700;
-    }
-
-    .day-footer{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-    }
-
-    .footer-card{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:var(--soft);
-    }
-
-    .week-reflection{
-      margin-top:12px;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      box-shadow:var(--shadow);
-    }
-
-    .week-reflection textarea{
-      min-height:84px;
-    }
-
-    @media (max-width:1100px){
-      .top-grid{grid-template-columns:1fr}
-      .week-summary{grid-template-columns:repeat(2,1fr)}
-      .day-footer{grid-template-columns:1fr}
-    }
-
-    @media (max-width:760px){
-      .app{padding:12px}
-      .header h1{font-size:24px}
-      .kpi-grid{grid-template-columns:1fr 1fr}
-      .week-summary{grid-template-columns:1fr}
-      .exercise-grid{grid-template-columns:1fr}
-    }
-
-    @media print{
-      body{background:#fff}
-      .app{max-width:none;padding:0}
-      .toolbar{display:none !important}
-      .panel,.day,.summary-box,.week-reflection{box-shadow:none}
-      .header{background:#fff;color:#111;border:1px solid #ddd;box-shadow:none}
-      .sub{color:#333}
-    }
-  </style>
 </head>
 <body>
-  <div class="app">
-    <div class="header">
-      <h1>March 9 – May 3 Training Routine Tracker</h1>
-      <div class="sub">
-        Fully expanded by default. Every day shows the actual workout routine, including exercises, sets, reps, target weights, exercise checkboxes, day-complete checkbox, and notes.
-      </div>
-      <div class="toolbar">
-        <button id="printBtn">Print</button>
-        <button class="secondary" id="resetWeekBtn">Reset Current Week</button>
-        <button class="danger" id="resetAllBtn">Reset All Data</button>
-      </div>
-    </div>
 
-    <div class="top-grid">
-      <div class="panel">
-        <h2>Completion dashboard</h2>
-        <div class="kpi-grid">
-          <div class="kpi">
-            <div class="label">Days complete</div>
-            <div class="value" id="daysComplete">0</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Exercises complete</div>
-            <div class="value" id="exercisesComplete">0</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Overall completion</div>
-            <div class="value" id="overallCompletion">0%</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Current week</div>
-            <div class="value" id="currentWeek">1</div>
-          </div>
-        </div>
-        <div class="small" style="margin-top:12px;">Block progress</div>
-        <div class="progress"><span id="blockProgress"></span></div>
-        <div class="small" id="blockProgressText" style="margin-top:8px;">0 of 56 days complete</div>
-      </div>
+<header>
+<h1>Body Recomp Training Dashboard</h1>
+<p>March 9 – May 3</p>
+<p><b>Focus:</b> Upper Chest • Lateral Delts • Upper Lats</p>
+</header>
 
-      <div class="panel">
-        <h2>Priority reminders</h2>
-        <div class="legend" style="margin-bottom:12px;">
-          <span class="pill strength">Monday — Upper Strength</span>
-          <span class="pill aesthetic">Thursday — Upper Aesthetic</span>
-          <span class="pill lower">Friday — Lower + Posterior Chain</span>
-          <span class="pill recovery">Recovery / Rest</span>
-        </div>
-        <div class="small">
-          <span class="bold">Visual emphasis:</span> lateral delts, upper chest, upper lats.<br><br>
-          <span class="bold">Core strategy:</span> planks, hanging knee raises, controlled core work. Avoid heavy oblique loading.
-        </div>
-      </div>
-    </div>
+<div class="tabs" id="tabs"></div>
 
-    <div class="weeks" id="weeksContainer"></div>
-  </div>
+<div id="weeks"></div>
 
-  <script>
-    const STORAGE_KEY = "march9_may3_tracker_expanded_v2";
+<script>
 
-    const schedule = [
-      // Week 1
-      {week:1,date:"2026-03-09",display:"Monday — March 9",title:"Upper Strength",type:"strength",focus:"High-value upper-body strength. Strong emphasis on upper chest, pressing strength, and back width.",exercises:[
-        ["Bench Press","4","5","175"],["Incline Bench","4","6","135"],["Barbell Row","4","6","95"],["Lat Pulldown","4","8","90"],["Dumbbell Shoulder Press","3","8","40"],["Skull Crushers","3","10","60"]
-      ]},
-      {week:1,date:"2026-03-10",display:"Tuesday — March 10",title:"Lower Strength",type:"lower",focus:"Foundational lower-body strength.",exercises:[
-        ["Back Squat","4","5","145"],["Deadlift","3","5","145"],["Walking Lunges","3","10 each leg","30 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:1,date:"2026-03-11",display:"Wednesday — March 11",title:"Active Recovery / Steps",type:"recovery",focus:"Recovery, movement, and readiness.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:1,date:"2026-03-12",display:"Thursday — March 12",title:"Upper Aesthetic",type:"aesthetic",focus:"Highest visual payoff: upper chest, lateral delts, and upper-back width.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:1,date:"2026-03-13",display:"Friday — March 13",title:"Lower + Posterior Chain",type:"lower",focus:"Posterior chain plus core tightening work.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:1,date:"2026-03-14",display:"Saturday — March 14",title:"Optional Conditioning / Core",type:"recovery",focus:"Short conditioning circuit. Keep effort crisp, not sloppy.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:1,date:"2026-03-15",display:"Sunday — March 15",title:"Rest",type:"recovery",focus:"Sleep, recovery, meal compliance, reflection.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+const weeks = [
 
-      // Week 2
-      {week:2,date:"2026-03-16",display:"Monday — March 16",title:"Upper Strength",type:"strength",focus:"Repeat Week 1 loads and sharpen execution.",exercises:[
-        ["Bench Press","4","5","175"],["Incline Bench","4","6","135"],["Barbell Row","4","6","95"],["Lat Pulldown","4","8","90"],["Dumbbell Shoulder Press","3","8","40"],["Skull Crushers","3","10","60"]
-      ]},
-      {week:2,date:"2026-03-17",display:"Tuesday — March 17",title:"Lower Strength",type:"lower",focus:"Repeat Week 1 lower-body loads.",exercises:[
-        ["Back Squat","4","5","145"],["Deadlift","3","5","145"],["Walking Lunges","3","10 each leg","30 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:2,date:"2026-03-18",display:"Wednesday — March 18",title:"Active Recovery / Steps",type:"recovery",focus:"Keep recovery high and fatigue low.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:2,date:"2026-03-19",display:"Thursday — March 19",title:"Upper Aesthetic",type:"aesthetic",focus:"Again: upper chest, lateral delts, upper lats.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:2,date:"2026-03-20",display:"Friday — March 20",title:"Lower + Posterior Chain",type:"lower",focus:"Drive hamstrings, glutes, and core control.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:2,date:"2026-03-21",display:"Saturday — March 21",title:"Optional Conditioning / Core",type:"recovery",focus:"Simple, fast, controlled conditioning.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:2,date:"2026-03-22",display:"Sunday — March 22",title:"Rest",type:"recovery",focus:"Recover and reflect.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+{
+name:"Week 1 (Mar 9–15)",
+days:[
+{
+title:"Monday — Upper Strength",
+ex:[
+"Bench Press — 4 x 5 @ 175",
+"Incline Bench — 4 x 6 @ 135",
+"Barbell Row — 4 x 6 @ 95",
+"Lat Pulldown — 4 x 8 @ 90",
+"Dumbbell Shoulder Press — 3 x 8 @ 40",
+"Skull Crushers — 3 x 10 @ 60"
+],
+rec:"Sauna evening 15–20 min • Cold optional morning 2–5 min"
+},
+{
+title:"Tuesday — Lower Strength",
+ex:[
+"Back Squat — 4 x 5 @ 145",
+"Deadlift — 3 x 5 @ 145",
+"Walking Lunges — 3 x 10 each leg",
+"Leg Curl — 3 x 10",
+"Standing Calf Raise — 4 x 12",
+"Planks — 3 x 45 sec"
+],
+rec:"Sauna evening 15–20 min • Cold morning 2–5 min"
+},
+{
+title:"Wednesday — Active Recovery",
+ex:[
+"Steps 8,000–12,000",
+"Mobility / Stretching"
+],
+rec:"Cold morning 3–5 min • Sauna evening 15–20 min"
+},
+{
+title:"Thursday — Upper Aesthetic",
+ex:[
+"Incline Dumbbell Press — 4 x 10",
+"Cable Fly — 3 x 12",
+"Wide Grip Lat Pulldown — 4 x 10",
+"Seated Cable Row — 3 x 10",
+"Lateral Raises — 4 x 12–15",
+"EZ Bar Curl — 3 x 10",
+"Tricep Pushdowns — 3 x 12"
+],
+rec:"Sauna evening 15–20 min • Cold morning optional"
+},
+{
+title:"Friday — Lower Posterior Chain",
+ex:[
+"Romanian Deadlift — 4 x 8",
+"Front or Goblet Squat — 3 x 10",
+"Hip Thrust — 3 x 10",
+"Leg Extension — 3 x 12",
+"Seated Calf Raise — 4 x 12",
+"Hanging Knee Raises — 3 x 12"
+],
+rec:"Sauna evening 15–20 min • Cold morning optional"
+},
+{
+title:"Saturday — Conditioning / Core",
+ex:[
+"Row Machine — 3 min",
+"Kettlebell Swings — 15",
+"Pushups — 15",
+"Air Squats — 20",
+"Repeat 4 rounds"
+],
+rec:"Cold after workout optional • Sauna evening optional"
+},
+{
+title:"Sunday — Rest",
+ex:["Rest","Focus on recovery and sleep"],
+rec:"Cold morning 3–5 min • Sauna evening 15–20 min"
+}
+]
+}
 
-      // Week 3
-      {week:3,date:"2026-03-23",display:"Monday — March 23",title:"Upper Strength",type:"strength",focus:"First load bump. Stay crisp and controlled.",exercises:[
-        ["Bench Press","4","5","180"],["Incline Bench","4","6","140"],["Barbell Row","4","6","100"],["Lat Pulldown","4","8","95"],["Dumbbell Shoulder Press","3","8","45"],["Skull Crushers","3","10","65"]
-      ]},
-      {week:3,date:"2026-03-24",display:"Tuesday — March 24",title:"Lower Strength",type:"lower",focus:"Step up load while maintaining clean form.",exercises:[
-        ["Back Squat","4","5","155"],["Deadlift","3","5","155"],["Walking Lunges","3","10 each leg","35 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:3,date:"2026-03-25",display:"Wednesday — March 25",title:"Active Recovery / Steps",type:"recovery",focus:"Walk, loosen up, stay fresh.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:3,date:"2026-03-26",display:"Thursday — March 26",title:"Upper Aesthetic",type:"aesthetic",focus:"Keep the visual-driver muscles on repeat.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:3,date:"2026-03-27",display:"Friday — March 27",title:"Lower + Posterior Chain",type:"lower",focus:"Posterior chain with clean core tension.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:3,date:"2026-03-28",display:"Saturday — March 28",title:"Optional Conditioning / Core",type:"recovery",focus:"Stay athletic without draining recovery.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:3,date:"2026-03-29",display:"Sunday — March 29",title:"Rest",type:"recovery",focus:"Recovery, food control, review.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+];
 
-      // Week 4
-      {week:4,date:"2026-03-30",display:"Monday — March 30",title:"Upper Strength",type:"strength",focus:"Repeat Week 3 loads and own them.",exercises:[
-        ["Bench Press","4","5","180"],["Incline Bench","4","6","140"],["Barbell Row","4","6","100"],["Lat Pulldown","4","8","95"],["Dumbbell Shoulder Press","3","8","45"],["Skull Crushers","3","10","65"]
-      ]},
-      {week:4,date:"2026-03-31",display:"Tuesday — March 31",title:"Lower Strength",type:"lower",focus:"Solidify the new lower-body loads.",exercises:[
-        ["Back Squat","4","5","155"],["Deadlift","3","5","155"],["Walking Lunges","3","10 each leg","35 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:4,date:"2026-04-01",display:"Wednesday — April 1",title:"Active Recovery / Steps",type:"recovery",focus:"Stay moving. Protect recovery.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:4,date:"2026-04-02",display:"Thursday — April 2",title:"Upper Aesthetic",type:"aesthetic",focus:"Same visual priorities. Stay precise.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:4,date:"2026-04-03",display:"Friday — April 3",title:"Lower + Posterior Chain",type:"lower",focus:"Posterior chain + core tension.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:4,date:"2026-04-04",display:"Saturday — April 4",title:"Optional Conditioning / Core",type:"recovery",focus:"Conditioning without junk fatigue.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:4,date:"2026-04-05",display:"Sunday — April 5",title:"Rest",type:"recovery",focus:"Recovery and weekly review.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+const tabs=document.getElementById("tabs");
+const weeksDiv=document.getElementById("weeks");
 
-      // Week 5
-      {week:5,date:"2026-04-06",display:"Monday — April 6",title:"Upper Strength",type:"strength",focus:"Second load bump begins.",exercises:[
-        ["Bench Press","4","5","185"],["Incline Bench","4","6","145"],["Barbell Row","4","6","105"],["Lat Pulldown","4","8","100"],["Dumbbell Shoulder Press","3","8","45"],["Skull Crushers","3","10","65"]
-      ]},
-      {week:5,date:"2026-04-07",display:"Tuesday — April 7",title:"Lower Strength",type:"lower",focus:"Push into the next lower-body tier.",exercises:[
-        ["Back Squat","4","5","165"],["Deadlift","3","5","165"],["Walking Lunges","3","10 each leg","40 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:5,date:"2026-04-08",display:"Wednesday — April 8",title:"Active Recovery / Steps",type:"recovery",focus:"Walk, mobilize, recover.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:5,date:"2026-04-09",display:"Thursday — April 9",title:"Upper Aesthetic",type:"aesthetic",focus:"Keep building the V-taper look.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:5,date:"2026-04-10",display:"Friday — April 10",title:"Lower + Posterior Chain",type:"lower",focus:"Posterior-chain quality and waist control.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:5,date:"2026-04-11",display:"Saturday — April 11",title:"Optional Conditioning / Core",type:"recovery",focus:"Short conditioning circuit.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:5,date:"2026-04-12",display:"Sunday — April 12",title:"Rest",type:"recovery",focus:"Rest and review.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+function save(){
+localStorage.setItem("workoutTracker",
+JSON.stringify([...document.querySelectorAll("input")].map(i=>i.checked)));
+}
 
-      // Week 6
-      {week:6,date:"2026-04-13",display:"Monday — April 13",title:"Upper Strength",type:"strength",focus:"Repeat Week 5 weights with control.",exercises:[
-        ["Bench Press","4","5","185"],["Incline Bench","4","6","145"],["Barbell Row","4","6","105"],["Lat Pulldown","4","8","100"],["Dumbbell Shoulder Press","3","8","45"],["Skull Crushers","3","10","65"]
-      ]},
-      {week:6,date:"2026-04-14",display:"Tuesday — April 14",title:"Lower Strength",type:"lower",focus:"Repeat Week 5 loads with clean execution.",exercises:[
-        ["Back Squat","4","5","165"],["Deadlift","3","5","165"],["Walking Lunges","3","10 each leg","40 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:6,date:"2026-04-15",display:"Wednesday — April 15",title:"Active Recovery / Steps",type:"recovery",focus:"Recovery and movement only.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:6,date:"2026-04-16",display:"Thursday — April 16",title:"Upper Aesthetic",type:"aesthetic",focus:"Keep the visual muscles on high frequency.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:6,date:"2026-04-17",display:"Friday — April 17",title:"Lower + Posterior Chain",type:"lower",focus:"Keep hamstrings and glutes working while leaning out.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:6,date:"2026-04-18",display:"Saturday — April 18",title:"Optional Conditioning / Core",type:"recovery",focus:"Circuit work if recovery is strong.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:6,date:"2026-04-19",display:"Sunday — April 19",title:"Rest",type:"recovery",focus:"Recovery and reflection.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+function load(){
+const data=JSON.parse(localStorage.getItem("workoutTracker")||"[]");
+document.querySelectorAll("input").forEach((el,i)=>{
+if(data[i]) el.checked=true;
+});
+}
 
-      // Week 7
-      {week:7,date:"2026-04-20",display:"Monday — April 20",title:"Upper Strength",type:"strength",focus:"Final load bump for upper strength.",exercises:[
-        ["Bench Press","4","5","190"],["Incline Bench","4","6","150"],["Barbell Row","4","6","110"],["Lat Pulldown","4","8","105"],["Dumbbell Shoulder Press","3","8","50"],["Skull Crushers","3","10","70"]
-      ]},
-      {week:7,date:"2026-04-21",display:"Tuesday — April 21",title:"Lower Strength",type:"lower",focus:"Final load bump for lower strength.",exercises:[
-        ["Back Squat","4","5","170"],["Deadlift","3","5","175"],["Walking Lunges","3","10 each leg","45 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:7,date:"2026-04-22",display:"Wednesday — April 22",title:"Active Recovery / Steps",type:"recovery",focus:"Recovery supports the final push.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:7,date:"2026-04-23",display:"Thursday — April 23",title:"Upper Aesthetic",type:"aesthetic",focus:"Keep chasing the look: shoulders, upper chest, upper lats.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:7,date:"2026-04-24",display:"Friday — April 24",title:"Lower + Posterior Chain",type:"lower",focus:"Posterior chain + core tightening.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:7,date:"2026-04-25",display:"Saturday — April 25",title:"Optional Conditioning / Core",type:"recovery",focus:"Optional but useful if you feel good.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:7,date:"2026-04-26",display:"Sunday — April 26",title:"Rest",type:"recovery",focus:"Recover, comply, reflect.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Weekly reflection","1","Review week","Yes"]
-      ]},
+function build(){
 
-      // Week 8
-      {week:8,date:"2026-04-27",display:"Monday — April 27",title:"Upper Strength",type:"strength",focus:"Final repeat at top upper-body loads.",exercises:[
-        ["Bench Press","4","5","190"],["Incline Bench","4","6","150"],["Barbell Row","4","6","110"],["Lat Pulldown","4","8","105"],["Dumbbell Shoulder Press","3","8","50"],["Skull Crushers","3","10","70"]
-      ]},
-      {week:8,date:"2026-04-28",display:"Tuesday — April 28",title:"Lower Strength",type:"lower",focus:"Final repeat at top lower-body loads.",exercises:[
-        ["Back Squat","4","5","170"],["Deadlift","3","5","175"],["Walking Lunges","3","10 each leg","45 lb dumbbells"],["Leg Curl","3","10","—"],["Standing Calf Raise","4","12","—"],["Planks","3","45 sec","Bodyweight"]
-      ]},
-      {week:8,date:"2026-04-29",display:"Wednesday — April 29",title:"Active Recovery / Steps",type:"recovery",focus:"Recover and set up the finish well.",exercises:[
-        ["Steps","1","8,000–12,000","Daily target"],["Mobility","1","10–15 min","Optional"],["Stretching","1","5–10 min","Optional"],["Recovery checklist","1","Complete","Yes"]
-      ]},
-      {week:8,date:"2026-04-30",display:"Thursday — April 30",title:"Upper Aesthetic",type:"aesthetic",focus:"Finish strong on the highest visual-return day.",exercises:[
-        ["Incline Dumbbell Press","4","10","45–50"],["Cable Fly","3","12","—"],["Wide Grip Lat Pulldown","4","10","90–100"],["Seated Cable Row","3","10","90"],["Lateral Raises","4","12–15","15–20"],["EZ Bar Curl","3","10","65"],["Tricep Pushdowns","3","12","—"]
-      ]},
-      {week:8,date:"2026-05-01",display:"Friday — May 1",title:"Lower + Posterior Chain",type:"lower",focus:"Finish the block with strong posterior-chain work.",exercises:[
-        ["Romanian Deadlift","4","8","135–155"],["Front Squat or Goblet Squat","3","10","50–70"],["Hip Thrust","3","10","—"],["Leg Extension","3","12","—"],["Seated Calf Raise","4","12","—"],["Hanging Knee Raises","3","12","Bodyweight"]
-      ]},
-      {week:8,date:"2026-05-02",display:"Saturday — May 2",title:"Optional Conditioning / Core",type:"recovery",focus:"Optional finisher if energy and recovery are solid.",exercises:[
-        ["Row machine","4 rounds","3 min","Per round"],["Kettlebell swings","4 rounds","15","Per round"],["Pushups","4 rounds","15","Bodyweight"],["Air squats","4 rounds","20","Bodyweight"]
-      ]},
-      {week:8,date:"2026-05-03",display:"Sunday — May 3",title:"Rest",type:"recovery",focus:"Final recovery day and full-block review.",exercises:[
-        ["Rest day","1","Complete","Yes"],["Sleep focus","1","7+ hours","Priority"],["Meal compliance","1","On plan","Yes"],["Recovery notes","1","Journal","Yes"],["Block reflection","1","Review full 8 weeks","Yes"]
-      ]}
-    ];
+weeks.forEach((week,w)=>{
 
-    const weeks = [1,2,3,4,5,6,7,8];
-    const totalDays = schedule.length;
-    const totalExercises = schedule.reduce((sum, d) => sum + d.exercises.length, 0);
+const tab=document.createElement("div");
+tab.className="tab";
+tab.innerText=week.name;
+tab.onclick=()=>showWeek(w);
+tabs.appendChild(tab);
 
-    function createInitialState(){
-      const state = { currentWeek: 1, reflections: {}, days: {} };
-      schedule.forEach(day => {
-        state.days[day.date] = {
-          done: false,
-          notes: "",
-          exercises: day.exercises.map(() => ({
-            checked: false,
-            actualWeight: "",
-            actualReps: "",
-            notes: ""
-          }))
-        };
-      });
-      weeks.forEach(w => state.reflections["week_" + w] = "");
-      return state;
-    }
+const weekDiv=document.createElement("div");
+weekDiv.className="week";
 
-    function loadState(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return createInitialState();
-        const parsed = JSON.parse(raw);
-        const fresh = createInitialState();
-        fresh.currentWeek = parsed.currentWeek || 1;
-        fresh.reflections = { ...fresh.reflections, ...(parsed.reflections || {}) };
-        Object.keys(fresh.days).forEach(date => {
-          if(parsed.days && parsed.days[date]){
-            fresh.days[date] = {
-              ...fresh.days[date],
-              ...parsed.days[date]
-            };
-            if(!Array.isArray(fresh.days[date].exercises)){
-              fresh.days[date].exercises = createInitialState().days[date].exercises;
-            }
-          }
-        });
-        return fresh;
-      }catch(e){
-        return createInitialState();
-      }
-    }
+week.days.forEach((day,d)=>{
 
-    let state = loadState();
+const card=document.createElement("div");
+card.className="day";
 
-    function saveState(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      renderDashboard();
-    }
+const h=document.createElement("h3");
+h.innerText=day.title;
+card.appendChild(h);
 
-    function escapeHtml(value){
-      return String(value)
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
-    }
+day.ex.forEach(e=>{
+const div=document.createElement("div");
+div.className="exercise";
+div.innerHTML=`<label><input type="checkbox"> ${e}</label>`;
+card.appendChild(div);
+});
 
-    function weekRangeText(week){
-      const days = schedule.filter(d => d.week === week);
-      const first = new Date(days[0].date + "T00:00:00");
-      const last = new Date(days[days.length - 1].date + "T00:00:00");
-      const opts = { month:"long", day:"numeric" };
-      return `${first.toLocaleDateString(undefined, opts)} – ${last.toLocaleDateString(undefined, opts)}`;
-    }
+const bottom=document.createElement("div");
+bottom.className="bottom";
 
-    function renderWeeks(){
-      const container = document.getElementById("weeksContainer");
-      container.innerHTML = "";
+bottom.innerHTML=`
+<label><input type="checkbox"> Workout Completed</label><br>
+<label><input type="checkbox"> Supplements Taken</label>
+`;
 
-      weeks.forEach(week => {
-        const weekDays = schedule.filter(d => d.week === week);
-        const completedDays = weekDays.filter(d => state.days[d.date].done).length;
-        const completedExercises = weekDays.reduce((sum, d) => {
-          return sum + state.days[d.date].exercises.filter(x => x.checked).length;
-        }, 0);
-        const totalWeekExercises = weekDays.reduce((sum, d) => sum + d.exercises.length, 0);
+card.appendChild(bottom);
 
-        const weekWrap = document.createElement("section");
-        weekWrap.className = "week";
-        weekWrap.innerHTML = `
-          <div class="week-head">
-            <div>
-              <h2>Week ${week}</h2>
-              <div class="small">${weekRangeText(week)}</div>
-            </div>
-            <div class="tiny">All days are expanded below.</div>
-          </div>
+const rec=document.createElement("div");
+rec.className="recovery";
+rec.innerText=day.rec;
+card.appendChild(rec);
 
-          <div class="week-summary">
-            <div class="summary-box">
-              <div class="label">Days complete</div>
-              <div class="value">${completedDays} / 7</div>
-            </div>
-            <div class="summary-box">
-              <div class="label">Exercises complete</div>
-              <div class="value">${completedExercises} / ${totalWeekExercises}</div>
-            </div>
-            <div class="summary-box">
-              <div class="label">Week completion</div>
-              <div class="value">${Math.round((completedDays / 7) * 100)}%</div>
-            </div>
-            <div class="summary-box">
-              <div class="label">Priority days</div>
-              <div class="value">Mon / Thu / Fri</div>
-            </div>
-          </div>
+weekDiv.appendChild(card);
 
-          <div class="days" id="week-days-${week}"></div>
+});
 
-          <div class="week-reflection">
-            <label for="reflection-${week}">Week ${week} reflection</label>
-            <textarea id="reflection-${week}" data-week-reflection="${week}" placeholder="What went well this week? What needs to tighten up next week?">${escapeHtml(state.reflections["week_" + week] || "")}</textarea>
-          </div>
-        `;
+weeksDiv.appendChild(weekDiv);
 
-        container.appendChild(weekWrap);
+});
 
-        const daysContainer = weekWrap.querySelector(`#week-days-${week}`);
-        weekDays.forEach(day => {
-          daysContainer.appendChild(renderDay(day));
-        });
-      });
-    }
+document.querySelectorAll("input").forEach(i=>{
+i.addEventListener("change",save);
+});
 
-    function renderDay(day){
-      const stored = state.days[day.date];
-      const completedExercises = stored.exercises.filter(x => x.checked).length;
+showWeek(0);
+load();
+}
 
-      const article = document.createElement("article");
-      article.className = `day ${day.type}`;
-      article.innerHTML = `
-        <div class="day-head">
-          <div>
-            <h3 class="day-title">${escapeHtml(day.display)}</h3>
-            <div class="day-sub"><span class="bold">${escapeHtml(day.title)}</span></div>
-            <div class="day-sub">${escapeHtml(day.focus)}</div>
-          </div>
-          <div class="day-badges">
-            <span class="badge ${stored.done ? 'complete' : ''}">${stored.done ? 'Day complete' : 'In progress'}</span>
-            <span class="badge">${completedExercises} / ${day.exercises.length} exercises</span>
-          </div>
-        </div>
-        <div class="day-body">
-          <div class="exercise-list" id="exercise-list-${day.date}"></div>
-          <div class="day-footer">
-            <div class="footer-card">
-              <label class="check-inline">
-                <input type="checkbox" data-type="day-done" data-date="${day.date}" ${stored.done ? 'checked' : ''}>
-                Mark day complete
-              </label>
-              <div class="small" style="margin-top:8px;">Use this when the full day is done.</div>
-            </div>
-            <div class="footer-card">
-              <label for="notes-${day.date}">Day notes</label>
-              <textarea id="notes-${day.date}" data-type="day-notes" data-date="${day.date}" placeholder="Notes, recovery, changes, scheduling issues, pain, wins, or anything you want to remember.">${escapeHtml(stored.notes || "")}</textarea>
-            </div>
-          </div>
-        </div>
-      `;
+function showWeek(i){
+document.querySelectorAll(".tab").forEach((t,n)=>{
+t.classList.toggle("active",n===i);
+});
+document.querySelectorAll(".week").forEach((w,n)=>{
+w.classList.toggle("active",n===i);
+});
+}
 
-      const list = article.querySelector(`#exercise-list-${day.date}`);
-      day.exercises.forEach((ex, index) => {
-        const row = stored.exercises[index];
-        const card = document.createElement("div");
-        card.className = "exercise";
-        card.innerHTML = `
-          <div class="exercise-top">
-            <div>
-              <div class="exercise-name">${escapeHtml(ex[0])}</div>
-              <div class="exercise-meta">Sets: <strong>${escapeHtml(ex[1])}</strong> • Reps: <strong>${escapeHtml(ex[2])}</strong> • Target weight: <strong>${escapeHtml(ex[3])}</strong></div>
-            </div>
-            <label class="check-inline">
-              <input type="checkbox" data-type="exercise-check" data-date="${day.date}" data-index="${index}" ${row.checked ? 'checked' : ''}>
-              complete
-            </label>
-          </div>
-          <div class="exercise-grid">
-            <div>
-              <label>Actual weight</label>
-              <input type="text" data-type="actual-weight" data-date="${day.date}" data-index="${index}" value="${escapeHtml(row.actualWeight || "")}" placeholder="Optional">
-            </div>
-            <div>
-              <label>Actual reps</label>
-              <input type="text" data-type="actual-reps" data-date="${day.date}" data-index="${index}" value="${escapeHtml(row.actualReps || "")}" placeholder="Optional">
-            </div>
-            <div>
-              <label>Exercise notes</label>
-              <input type="text" data-type="exercise-notes" data-date="${day.date}" data-index="${index}" value="${escapeHtml(row.notes || "")}" placeholder="Form cues, effort, anything notable">
-            </div>
-          </div>
-        `;
-        list.appendChild(card);
-      });
+build();
 
-      return article;
-    }
+</script>
 
-    function renderDashboard(){
-      const completedDays = schedule.filter(d => state.days[d.date].done).length;
-      const completedExercises = schedule.reduce((sum, d) => {
-        return sum + state.days[d.date].exercises.filter(x => x.checked).length;
-      }, 0);
-
-      const overallCompletion = Math.round(((completedDays + completedExercises) / (totalDays + totalExercises)) * 100);
-      const blockCompletion = Math.round((completedDays / totalDays) * 100);
-
-      document.getElementById("daysComplete").textContent = completedDays;
-      document.getElementById("exercisesComplete").textContent = completedExercises;
-      document.getElementById("overallCompletion").textContent = overallCompletion + "%";
-      document.getElementById("currentWeek").textContent = state.currentWeek;
-      document.getElementById("blockProgress").style.width = blockCompletion + "%";
-      document.getElementById("blockProgressText").textContent = `${completedDays} of ${totalDays} days complete`;
-
-      renderWeeks();
-      bindDynamicEvents();
-    }
-
-    function findWeekByDate(date){
-      const day = schedule.find(d => d.date === date);
-      return day ? day.week : 1;
-    }
-
-    function bindDynamicEvents(){
-      document.querySelectorAll("[data-type='exercise-check']").forEach(el => {
-        el.onchange = (e) => {
-          const date = e.target.dataset.date;
-          const index = Number(e.target.dataset.index);
-          state.days[date].exercises[index].checked = e.target.checked;
-          state.currentWeek = findWeekByDate(date);
-          saveState();
-        };
-      });
-
-      document.querySelectorAll("[data-type='day-done']").forEach(el => {
-        el.onchange = (e) => {
-          const date = e.target.dataset.date;
-          state.days[date].done = e.target.checked;
-          state.currentWeek = findWeekByDate(date);
-          saveState();
-        };
-      });
-
-      document.querySelectorAll("[data-type='actual-weight']").forEach(el => {
-        el.oninput = (e) => {
-          const date = e.target.dataset.date;
-          const index = Number(e.target.dataset.index);
-          state.days[date].exercises[index].actualWeight = e.target.value;
-          state.currentWeek = findWeekByDate(date);
-          saveState();
-        };
-      });
-
-      document.querySelectorAll("[data-type='actual-reps']").forEach(el => {
-        el.oninput = (e) => {
-          const date = e.target.dataset.date;
-          const index = Number(e.target.dataset.index);
-          state.days[date].exercises[index].actualReps = e.target.value;
-          state.currentWeek = findWeekByDate(date);
-          saveState();
-        };
-      });
-
-      document.querySelectorAll("[data-type='exercise-notes']").forEach(el => {
-        el.oninput = (e) => {
-          const date = e.target.dataset.date;
-          const index = Number(e.target.dataset.index);
-          state.days[date].exercises[index].notes = e.target.value;
-          state.currentWeek = findWeekByDate(date);
-          saveState();
-        };
-      });
-
-      document.querySelectorAll("[data-type='day-notes']").forEach(el => {
-        el.oninput = (e) => {
-          const date = e.target.dataset.date;
-          state.days[date].notes = e.target.value;
-          state.currentWeek = findWeekByDate(date);
-          saveState();
-        };
-      });
-
-      document.querySelectorAll("[data-week-reflection]").forEach(el => {
-        el.oninput = (e) => {
-          const week = e.target.dataset.weekReflection;
-          state.reflections["week_" + week] = e.target.value;
-          state.currentWeek = Number(week);
-          saveState();
-        };
-      });
-    }
-
-    document.getElementById("printBtn").addEventListener("click", () => window.print());
-
-    document.getElementById("resetWeekBtn").addEventListener("click", () => {
-      const week = state.currentWeek;
-      if(!confirm(`Reset all saved data for Week ${week}?`)) return;
-      schedule.filter(d => d.week === week).forEach(day => {
-        state.days[day.date] = {
-          done: false,
-          notes: "",
-          exercises: day.exercises.map(() => ({
-            checked: false,
-            actualWeight: "",
-            actualReps: "",
-            notes: ""
-          }))
-        };
-      });
-      state.reflections["week_" + week] = "";
-      saveState();
-    });
-
-    document.getElementById("resetAllBtn").addEventListener("click", () => {
-      if(!confirm("Reset all saved data for the full March 9 – May 3 block?")) return;
-      localStorage.removeItem(STORAGE_KEY);
-      state = createInitialState();
-      saveState();
-    });
-
-    renderDashboard();
-  </script>
 </body>
 </html>

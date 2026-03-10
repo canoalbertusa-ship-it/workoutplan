@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Body Recomp Training Dashboard</title>
+<title>Fitness Command Center</title>
 
 <style>
+
 body{
-font-family:Arial, Helvetica, sans-serif;
+font-family:system-ui,-apple-system;
 margin:0;
-background:#f4f6f8;
+background:#f3f4f6;
+color:#111;
 }
 
 header{
-background:#1f2937;
+background:#111827;
 color:white;
 padding:20px;
 text-align:center;
@@ -20,249 +22,423 @@ text-align:center;
 
 .tabs{
 display:flex;
-flex-wrap:wrap;
+overflow-x:auto;
 background:#e5e7eb;
 }
 
 .tab{
 padding:12px 18px;
 cursor:pointer;
-border-right:1px solid #d1d5db;
+white-space:nowrap;
 }
 
 .tab.active{
 background:white;
 font-weight:bold;
+border-bottom:3px solid #111827;
 }
 
-.week{
-display:none;
-padding:20px;
+.container{
+max-width:900px;
+margin:auto;
+padding:16px;
 }
 
-.week.active{
-display:block;
+.metrics{
+background:white;
+padding:14px;
+border-radius:10px;
+margin-bottom:14px;
+box-shadow:0 3px 8px rgba(0,0,0,.08);
+}
+
+.metric-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:8px;
+}
+
+.metric-grid input{
+padding:6px;
+width:100%;
 }
 
 .day{
 background:white;
-padding:18px;
-margin-bottom:15px;
-border-radius:8px;
-box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-
-.day h3{
-margin-top:0;
+padding:16px;
+border-radius:10px;
+margin-bottom:14px;
+box-shadow:0 3px 8px rgba(0,0,0,.08);
 }
 
 .exercise{
-margin:6px 0;
-}
-
-.bottom{
-margin-top:10px;
-border-top:1px solid #e5e7eb;
-padding-top:10px;
+margin:5px 0;
 }
 
 .recovery{
 margin-top:10px;
 font-size:14px;
-color:#374151;
 background:#f9fafb;
 padding:8px;
 border-radius:6px;
 }
 
-@media print{
-.tabs{display:none;}
+.progress{
+background:#e5e7eb;
+height:10px;
+border-radius:5px;
+overflow:hidden;
+margin-top:8px;
 }
-</style>
 
+.bar{
+background:#10b981;
+height:100%;
+width:0%;
+}
+
+.controls{
+display:flex;
+gap:10px;
+padding:10px;
+flex-wrap:wrap;
+}
+
+button{
+padding:8px 14px;
+border:none;
+border-radius:6px;
+background:#111827;
+color:white;
+cursor:pointer;
+}
+
+button.secondary{
+background:#6b7280;
+}
+
+</style>
 </head>
+
 <body>
 
 <header>
-<h1>Body Recomp Training Dashboard</h1>
-<p>March 9 – May 3</p>
-<p><b>Focus:</b> Upper Chest • Lateral Delts • Upper Lats</p>
+
+<h2>Fitness Command Center</h2>
+
+<div>
+Focus: Upper Chest • Lateral Delts • Upper Lats
+</div>
+
 </header>
+
+<div class="controls">
+
+<button onclick="resetWeek()">Reset Week</button>
+
+<button class="secondary" onclick="resetAll()">Reset All</button>
+
+</div>
 
 <div class="tabs" id="tabs"></div>
 
-<div id="weeks"></div>
+<div class="container">
+
+<div class="metrics">
+
+<h3>Daily Metrics</h3>
+
+<div class="metric-grid">
+
+<div>
+Calories
+<input id="calories" type="number">
+</div>
+
+<div>
+Protein (g)
+<input id="protein" type="number">
+</div>
+
+<div>
+Carbs (g)
+<input id="carbs" type="number">
+</div>
+
+<div>
+Fat (g)
+<input id="fat" type="number">
+</div>
+
+<div>
+Steps
+<input id="steps" type="number">
+</div>
+
+<div>
+Water (liters)
+<input id="water" type="number">
+</div>
+
+<div>
+Bodyweight
+<input id="weight" type="number">
+</div>
+
+</div>
+
+</div>
+
+<div>
+
+Weekly Workout Progress
+
+<div class="progress">
+<div class="bar" id="progressBar"></div>
+</div>
+
+</div>
+
+<div id="content"></div>
+
+</div>
 
 <script>
 
-const weeks = [
+const recovery=[
+"Sauna evening 15-20 min • Cold morning optional",
+"Sauna evening 15-20 min • Cold morning optional",
+"Cold morning 3-5 min • Sauna evening optional",
+"Sauna evening 15-20 min",
+"Sauna evening 15-20 min",
+"Cold optional after workout",
+"Cold morning 3-5 min • Sauna optional"
+]
 
-{
-name:"Week 1 (Mar 9–15)",
-days:[
-{
-title:"Monday — Upper Strength",
-ex:[
-"Bench Press — 4 x 5 @ 175",
-"Incline Bench — 4 x 6 @ 135",
-"Barbell Row — 4 x 6 @ 95",
-"Lat Pulldown — 4 x 8 @ 90",
-"Dumbbell Shoulder Press — 3 x 8 @ 40",
-"Skull Crushers — 3 x 10 @ 60"
+const workouts={
+
+upperStrength:(bench,inc,row,lat,press,tri)=>[
+`Bench Press — 4x5 @ ${bench}`,
+`Incline Bench — 4x6 @ ${inc}`,
+`Barbell Row — 4x6 @ ${row}`,
+`Lat Pulldown — 4x8 @ ${lat}`,
+`DB Shoulder Press — 3x8 @ ${press}`,
+`Skull Crushers — 3x10 @ ${tri}`
 ],
-rec:"Sauna evening 15–20 min • Cold optional morning 2–5 min"
-},
-{
-title:"Tuesday — Lower Strength",
-ex:[
-"Back Squat — 4 x 5 @ 145",
-"Deadlift — 3 x 5 @ 145",
-"Walking Lunges — 3 x 10 each leg",
-"Leg Curl — 3 x 10",
-"Standing Calf Raise — 4 x 12",
-"Planks — 3 x 45 sec"
+
+lowerStrength:(sq,dl,lunge)=>[
+`Back Squat — 4x5 @ ${sq}`,
+`Deadlift — 3x5 @ ${dl}`,
+`Walking Lunges — 3x10 each leg @ ${lunge}`,
+`Leg Curl — 3x10`,
+`Standing Calf Raise — 4x12`,
+`Planks — 3x45s`
 ],
-rec:"Sauna evening 15–20 min • Cold morning 2–5 min"
-},
-{
-title:"Wednesday — Active Recovery",
-ex:[
-"Steps 8,000–12,000",
-"Mobility / Stretching"
+
+upperAesthetic:[
+"Incline DB Press — 4x10 @ 45-50",
+"Cable Fly — 3x12",
+"Wide Lat Pulldown — 4x10 @ 90-100",
+"Seated Cable Row — 3x10 @ 90",
+"Lateral Raises — 4x12-15",
+"EZ Curl — 3x10 @ 65",
+"Tricep Pushdown — 3x12"
 ],
-rec:"Cold morning 3–5 min • Sauna evening 15–20 min"
-},
-{
-title:"Thursday — Upper Aesthetic",
-ex:[
-"Incline Dumbbell Press — 4 x 10",
-"Cable Fly — 3 x 12",
-"Wide Grip Lat Pulldown — 4 x 10",
-"Seated Cable Row — 3 x 10",
-"Lateral Raises — 4 x 12–15",
-"EZ Bar Curl — 3 x 10",
-"Tricep Pushdowns — 3 x 12"
+
+posterior:[
+"Romanian Deadlift — 4x8 @ 135-155",
+"Front / Goblet Squat — 3x10",
+"Hip Thrust — 3x10",
+"Leg Extension — 3x12",
+"Seated Calf Raise — 4x12",
+"Hanging Knee Raises — 3x12"
 ],
-rec:"Sauna evening 15–20 min • Cold morning optional"
-},
-{
-title:"Friday — Lower Posterior Chain",
-ex:[
-"Romanian Deadlift — 4 x 8",
-"Front or Goblet Squat — 3 x 10",
-"Hip Thrust — 3 x 10",
-"Leg Extension — 3 x 12",
-"Seated Calf Raise — 4 x 12",
-"Hanging Knee Raises — 3 x 12"
-],
-rec:"Sauna evening 15–20 min • Cold morning optional"
-},
-{
-title:"Saturday — Conditioning / Core",
-ex:[
+
+conditioning:[
 "Row Machine — 3 min",
 "Kettlebell Swings — 15",
 "Pushups — 15",
 "Air Squats — 20",
 "Repeat 4 rounds"
-],
-rec:"Cold after workout optional • Sauna evening optional"
-},
-{
-title:"Sunday — Rest",
-ex:["Rest","Focus on recovery and sleep"],
-rec:"Cold morning 3–5 min • Sauna evening 15–20 min"
-}
 ]
+
 }
 
-];
+const weeks=[
 
-const tabs=document.getElementById("tabs");
-const weeksDiv=document.getElementById("weeks");
+{bench:175,inc:135,row:95,lat:90,press:40,tri:60,sq:145,dl:145,lunge:30},
+{bench:175,inc:135,row:95,lat:90,press:40,tri:60,sq:145,dl:145,lunge:30},
+{bench:180,inc:140,row:100,lat:95,press:45,tri:65,sq:155,dl:155,lunge:35},
+{bench:180,inc:140,row:100,lat:95,press:45,tri:65,sq:155,dl:155,lunge:35},
+{bench:185,inc:145,row:105,lat:100,press:45,tri:65,sq:165,dl:165,lunge:40},
+{bench:185,inc:145,row:105,lat:100,press:45,tri:65,sq:165,dl:165,lunge:40},
+{bench:190,inc:150,row:110,lat:105,press:50,tri:70,sq:170,dl:175,lunge:45},
+{bench:190,inc:150,row:110,lat:105,press:50,tri:70,sq:170,dl:175,lunge:45}
+]
+
+const tabs=document.getElementById("tabs")
+const content=document.getElementById("content")
 
 function save(){
-localStorage.setItem("workoutTracker",
-JSON.stringify([...document.querySelectorAll("input")].map(i=>i.checked)));
+
+const data={}
+
+data.checks=[...document.querySelectorAll("input[type=checkbox]")].map(x=>x.checked)
+
+data.calories=calories.value
+data.protein=protein.value
+data.carbs=carbs.value
+data.fat=fat.value
+data.steps=steps.value
+data.water=water.value
+data.weight=weight.value
+
+localStorage.setItem("fitnessData",JSON.stringify(data))
+
+updateProgress()
+
 }
 
 function load(){
-const data=JSON.parse(localStorage.getItem("workoutTracker")||"[]");
-document.querySelectorAll("input").forEach((el,i)=>{
-if(data[i]) el.checked=true;
-});
+
+const data=JSON.parse(localStorage.getItem("fitnessData")||"{}")
+
+document.querySelectorAll("input[type=checkbox]").forEach((c,i)=>{
+if(data.checks && data.checks[i]) c.checked=true
+})
+
+if(data.calories) calories.value=data.calories
+if(data.protein) protein.value=data.protein
+if(data.carbs) carbs.value=data.carbs
+if(data.fat) fat.value=data.fat
+if(data.steps) steps.value=data.steps
+if(data.water) water.value=data.water
+if(data.weight) weight.value=data.weight
+
+updateProgress()
+
 }
 
-function build(){
+function updateProgress(){
 
-weeks.forEach((week,w)=>{
+const workouts=[...document.querySelectorAll(".workoutComplete")]
 
-const tab=document.createElement("div");
-tab.className="tab";
-tab.innerText=week.name;
-tab.onclick=()=>showWeek(w);
-tabs.appendChild(tab);
+let done=0
 
-const weekDiv=document.createElement("div");
-weekDiv.className="week";
+workouts.forEach(w=>{
+if(w.checked) done++
+})
 
-week.days.forEach((day,d)=>{
+const percent=(done/workouts.length)*100
 
-const card=document.createElement("div");
-card.className="day";
+document.getElementById("progressBar").style.width=percent+"%"
 
-const h=document.createElement("h3");
-h.innerText=day.title;
-card.appendChild(h);
-
-day.ex.forEach(e=>{
-const div=document.createElement("div");
-div.className="exercise";
-div.innerHTML=`<label><input type="checkbox"> ${e}</label>`;
-card.appendChild(div);
-});
-
-const bottom=document.createElement("div");
-bottom.className="bottom";
-
-bottom.innerHTML=`
-<label><input type="checkbox"> Workout Completed</label><br>
-<label><input type="checkbox"> Supplements Taken</label>
-`;
-
-card.appendChild(bottom);
-
-const rec=document.createElement("div");
-rec.className="recovery";
-rec.innerText=day.rec;
-card.appendChild(rec);
-
-weekDiv.appendChild(card);
-
-});
-
-weeksDiv.appendChild(weekDiv);
-
-});
-
-document.querySelectorAll("input").forEach(i=>{
-i.addEventListener("change",save);
-});
-
-showWeek(0);
-load();
 }
 
 function showWeek(i){
+
 document.querySelectorAll(".tab").forEach((t,n)=>{
-t.classList.toggle("active",n===i);
-});
-document.querySelectorAll(".week").forEach((w,n)=>{
-w.classList.toggle("active",n===i);
-});
+t.classList.toggle("active",n===i)
+})
+
+renderWeek(i)
+
 }
 
-build();
+function renderWeek(i){
+
+content.innerHTML=""
+
+const w=weeks[i]
+
+const days=[
+
+{title:"Monday — Upper Strength",ex:workouts.upperStrength(w.bench,w.inc,w.row,w.lat,w.press,w.tri)},
+
+{title:"Tuesday — Lower Strength",ex:workouts.lowerStrength(w.sq,w.dl,w.lunge)},
+
+{title:"Wednesday — Recovery",ex:["Steps 8k-12k","Mobility","Stretching"]},
+
+{title:"Thursday — Upper Aesthetic",ex:workouts.upperAesthetic},
+
+{title:"Friday — Posterior Chain",ex:workouts.posterior},
+
+{title:"Saturday — Conditioning",ex:workouts.conditioning},
+
+{title:"Sunday — Rest",ex:["Rest","Sleep + recovery"]}
+
+]
+
+days.forEach((d,di)=>{
+
+const card=document.createElement("div")
+card.className="day"
+
+let html=`<h3>${d.title}</h3>`
+
+d.ex.forEach(e=>{
+html+=`<div class="exercise"><label><input type="checkbox"> ${e}</label></div>`
+})
+
+html+=`
+
+<div class="exercise">
+<label><input class="workoutComplete" type="checkbox"> Workout Completed</label>
+</div>
+
+<div class="exercise">
+<label><input type="checkbox"> Supplements Taken</label>
+</div>
+
+<div class="recovery">${recovery[di]}</div>
+`
+
+card.innerHTML=html
+
+content.appendChild(card)
+
+})
+
+document.querySelectorAll("input").forEach(i=>{
+i.addEventListener("change",save)
+})
+
+load()
+
+}
+
+function resetWeek(){
+
+content.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false)
+
+save()
+
+}
+
+function resetAll(){
+
+localStorage.clear()
+
+location.reload()
+
+}
+
+weeks.forEach((w,i)=>{
+
+const t=document.createElement("div")
+t.className="tab"
+t.innerText="Week "+(i+1)
+t.onclick=()=>showWeek(i)
+
+tabs.appendChild(t)
+
+})
+
+showWeek(0)
+
+document.querySelectorAll("input").forEach(i=>{
+i.addEventListener("change",save)
+})
 
 </script>
 
